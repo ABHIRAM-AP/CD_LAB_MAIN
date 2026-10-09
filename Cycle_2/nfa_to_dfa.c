@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #define MAXSTATES 5
 
 typedef struct
@@ -11,56 +10,35 @@ typedef struct
 void sortState(DFA *s)
 {
     for (int i = 0; i < s->count - 1; i++)
-    {
         for (int j = 0; j < s->count - i - 1; j++)
-        {
             if (s->states[j] > s->states[j + 1])
             {
                 int temp = s->states[j];
                 s->states[j] = s->states[j + 1];
                 s->states[j + 1] = temp;
             }
-        }
-    }
 }
 
 int alreadyIn(DFA a, int b)
 {
     for (int i = 0; i < a.count; i++)
-    {
         if (a.states[i] == b)
-        {
             return 1;
-        }
-    }
     return 0;
-}
-
-int compareStates(DFA a, DFA b)
-{
-    if (a.count != b.count)
-    {
-        return 0;
-    }
-
-    for (int i = 0; i < a.count; i++)
-    {
-        if (a.states[i] != b.states[i])
-        {
-            return 0;
-        }
-    }
-    return 1;
 }
 
 int findDFAState(DFA dfa[], DFA s, int dfaCount)
 {
     for (int i = 0; i < dfaCount; i++)
     {
-        if (compareStates(dfa[i], s))
-        {
+        if (dfa[i].count != s.count)
+            continue;
+        int match = 1;
+        for (int j = 0; j < s.count; j++)
+            if (dfa[i].states[j] != s.states[j])
+                match = 0;
+        if (match)
             return i;
-        }
     }
     return -1;
 }
@@ -68,38 +46,24 @@ int findDFAState(DFA dfa[], DFA s, int dfaCount)
 void acceptNFA(int states, int inputs, int nfa[][inputs][states], int nfaCount[][inputs])
 {
     printf("\nEnter transitions:\n");
-
     for (int i = 0; i < states; i++)
-    {
-        printf("\n");
         for (int j = 0; j < inputs; j++)
         {
-            printf("Number of transitions from q%d on input %d: ", i, j);
+            printf("Transitions from q%d on input %d: ", i, j);
             scanf("%d", &nfaCount[i][j]);
-
-            if (nfaCount[i][j] > 0)
-            {
-                printf("Destination states: ");
-            }
             for (int k = 0; k < nfaCount[i][j]; k++)
-            {
                 scanf("%d", &nfa[i][j][k]);
-            }
         }
-    }
 }
 
-void conversion(int states, int inputs, int nfa[][inputs][states], int nfaCount[][inputs], DFA dfa[], int dfaCount)
+int conversion(int states, int inputs, int nfa[][inputs][states], int nfaCount[][inputs], DFA dfa[], int dfaCount)
 {
     printf("\nDFA Transition Table:\n");
-
     for (int i = 0; i < dfaCount; i++)
     {
         printf("\nState [ ");
         for (int j = 0; j < dfa[i].count; j++)
-        {
             printf("q%d ", dfa[i].states[j]);
-        }
         printf("]\n");
 
         for (int j = 0; j < inputs; j++)
@@ -110,36 +74,28 @@ void conversion(int states, int inputs, int nfa[][inputs][states], int nfaCount[
             for (int k = 0; k < dfa[i].count; k++)
             {
                 int current = dfa[i].states[k];
-
                 for (int l = 0; l < nfaCount[current][j]; l++)
                 {
                     int ns = nfa[current][j][l];
-
                     if (!alreadyIn(next, ns))
-                    {
                         next.states[next.count++] = ns;
-                    }
                 }
             }
             sortState(&next);
 
-            int index = findDFAState(dfa, next, dfaCount);
-            if (index == -1 && next.count > 0)
-            {
+            if (findDFAState(dfa, next, dfaCount) == -1 && next.count > 0)
                 dfa[dfaCount++] = next;
-            }
 
             printf("  On input %d -> [ ", j);
             for (int k = 0; k < next.count; k++)
-            {
                 printf("q%d ", next.states[k]);
-            }
             printf("]\n");
         }
     }
+    return dfaCount;
 }
 
-void main()
+int main()
 {
     int states, inputs;
     printf("Enter the no: of states: ");
@@ -153,8 +109,9 @@ void main()
 
     DFA dfa[1 << states];
     int dfaCount = 0;
-
     dfa[dfaCount].count = 1;
     dfa[dfaCount++].states[0] = 0;
+
     conversion(states, inputs, nfa, nfaCount, dfa, dfaCount);
+    return 0;
 }
