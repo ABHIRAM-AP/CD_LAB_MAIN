@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAXP 30
-#define MAXD 100
+#define MAXP 10
+#define MAXD 50
 
-char lhs[MAXP], rhs[MAXP][20];
+char lhs[MAXP], rhs[MAXP][10];
 int np, n;
-char in[64], st[MAXD + 5], start;
+char in[20], st[MAXD], start;
 
-char sStack[MAXD][MAXD + 5], sAct[MAXD][40];
+char sStack[MAXD][MAXD], sAct[MAXD][30];
 int sIp[MAXD];
 
 void record(int d, int top, int ip, const char *act)
@@ -25,30 +25,30 @@ int parse(int top, int ip, int d)
         return 0;
     if (ip == n && top == 1 && st[0] == start)
     {
-        printf("%-15s %-15s %s\n", "STACK", "INPUT", "ACTION");
-        printf("%-15s %-15s %s\n", "$", in, "-");
+        printf("%-10s %-10s %s\n", "STACK", "INPUT", "ACTION");
+        printf("%-10s %-10s %s\n", "$", in, "-");
         for (int i = 0; i < d; i++)
-            printf("%-15s %-15s %s\n", sStack[i], in + sIp[i], sAct[i]);
+            printf("%-10s %-10s %s\n", sStack[i], in + sIp[i], sAct[i]);
         return 1;
     }
 
-    /* try every possible reduction */
     for (int p = 0; p < np; p++)
     {
         int len = strlen(rhs[p]);
+        if (len == 0)
+            continue; /* skip epsilon productions */
         if (top >= len && strncmp(st + top - len, rhs[p], len) == 0)
         {
-            char act[40];
+            char act[30];
             st[top - len] = lhs[p];
             snprintf(act, sizeof act, "REDUCE %c->%s", lhs[p], rhs[p]);
             record(d, top - len + 1, ip, act);
             if (parse(top - len + 1, ip, d + 1))
                 return 1;
-            memcpy(st + top - len, rhs[p], len); /* backtrack */
+            memcpy(st + top - len, rhs[p], len);
         }
     }
 
-    /* try shift */
     if (ip < n && top < MAXD)
     {
         st[top] = in[ip];
@@ -61,19 +61,19 @@ int parse(int top, int ip, int d)
 
 int main()
 {
-    char line[40];
+    char line[20];
     printf("Number of productions: ");
     scanf("%d", &np);
     printf("Enter productions (e.g. E->E+E):\n");
     for (int i = 0; i < np; i++)
     {
-        scanf("%39s", line);
+        scanf("%19s", line);
         lhs[i] = line[0];
         strcpy(rhs[i], line + 3);
     }
     start = lhs[0];
     printf("Input string: ");
-    scanf("%63s", in);
+    scanf("%19s", in);
     n = strlen(in);
 
     if (!parse(0, 0, 0))

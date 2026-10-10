@@ -1,31 +1,110 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
-char input[100];
-int pos = 0;
-
-void S()
+void acceptDFA(int states, int inputs, int delta[][inputs])
 {
-    if (input[pos] == '0' || input[pos] == '1')
-        pos++;
-    else
+    for (int i = 0; i < states; i++)
     {
-        printf("Invalid\n");
-        exit(0);
+        printf("\n");
+        for (int j = 0; j < inputs; j++)
+        {
+            printf("Transition(q%d,%d): q", i, j);
+            scanf("%d", &delta[i][j]);
+        }
     }
-    if (input[pos] == '0' || input[pos] == '1')
-        S();
 }
 
-int main()
+int findRep(int states, int currgrp, int group[])
 {
-    printf("Enter input\n");
-    scanf("%s", input);
-    S();
-    if (input[pos] == '\0')
-        printf("Valid");
-    else
-        printf("invalid");
+    for (int i = 0; i < states; i++)
+        if (group[i] == currgrp)
+            return i;
+    return -1;
+}
+
+int minimize(int states, int inputs, int delta[][inputs], int group[])
+{
+    int split, changed, count, temp[states], newgrp = 2;
+    do
+    {
+        changed = 0;
+        for (int currgrp = 0; currgrp < newgrp; currgrp++)
+        {
+            count = 0, split = 0;
+            int rep = findRep(states, currgrp, group);
+            if (rep == -1)
+                continue;
+
+            for (int i = rep + 1; i < states; i++)
+            {
+                if (group[i] != currgrp)
+                    continue;
+                for (int j = 0; j < inputs; j++)
+                    if (group[delta[rep][j]] != group[delta[i][j]])
+                    {
+                        temp[count++] = i;
+                        split = 1;
+                        break;
+                    }
+            }
+            for (int i = 0; i < count; i++)
+                group[temp[i]] = newgrp;
+            if (split)
+            {
+                newgrp++;
+                changed = 1;
+            }
+        }
+    } while (changed);
+    return newgrp;
+}
+
+void displayGroup(int states, int currgrp, int group[])
+{
+    for (int i = 0; i < states; i++)
+        if (currgrp == group[i])
+            printf("q%d ", i);
+}
+
+void display(int totalgrp, int states, int inputs, int group[], int delta[][inputs])
+{
+    printf("\nMinimized DFA Transition Table\n");
+    for (int i = 0; i < totalgrp; i++)
+    {
+        printf("\nState: %s[ ", (i == 1) ? "*" : "");
+        displayGroup(states, i, group);
+        printf("]\n");
+
+        int rep = findRep(states, i, group);
+        for (int j = 0; j < inputs; j++)
+        {
+            printf("  On input %d -> [ ", j);
+            displayGroup(states, group[delta[rep][j]], group);
+            printf("]\n");
+        }
+    }
+}
+
+void main()
+{
+    int states, inputs, temp, f, totalgrp;
+    printf("Enter the no:of states & inputs:");
+    scanf("%d %d", &states, &inputs);
+
+    int delta[states][inputs], group[states];
+    acceptDFA(states, inputs, delta);
+
+    printf("\nEnter no: of final states: ");
+    scanf("%d", &f);
+    memset(group, 0, sizeof(group));
+
+    printf("Enter final states: ");
+    for (int i = 0; i < f; i++)
+    {
+        scanf("%d", &temp);
+        group[temp] = 1;
+    }
+
+    totalgrp = minimize(states, inputs, delta, group);
+    display(totalgrp, states, inputs, group, delta);
 }

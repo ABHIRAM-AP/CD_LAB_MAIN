@@ -5,7 +5,7 @@
 char prod[20][20], first[26][20], follow[26][20];
 int n, firstCnt[26], followCnt[26];
 
-int add(char set[], int *cnt, char ch)
+int add(char *set, int *cnt, char ch)
 {
     for (int i = 0; i < *cnt; i++)
         if (set[i] == ch)
@@ -15,7 +15,7 @@ int add(char set[], int *cnt, char ch)
     return 1;
 }
 
-int findFirst(char str[], char result[])
+int findFirst(char *str, char *result)
 {
     int cnt = 0, epsilon = 1;
 
@@ -25,7 +25,8 @@ int findFirst(char str[], char result[])
 
         if (!isupper(ch))
         {
-            if (ch != '#')
+            epsilon = (ch == '#');
+            if (!epsilon)
                 add(result, &cnt, ch);
             break;
         }
@@ -94,16 +95,17 @@ void findFollow()
     } while (change);
 }
 
-int main()
+void readGrammar()
 {
     scanf("%d", &n);
-
     for (int i = 0; i < n; i++)
         scanf("%s", prod[i]);
+}
 
+void computeFirstAll()
+{
     int change;
 
-    /* FIRST */
     do
     {
         change = 0;
@@ -115,17 +117,15 @@ int main()
             int cnt = findFirst(prod[i] + 2, result);
 
             for (int j = 0; j < cnt; j++)
-                if (add(first[left],
-                        &firstCnt[left],
-                        result[j]))
+                if (add(first[left], &firstCnt[left], result[j]))
                     change = 1;
         }
 
     } while (change);
+}
 
-    /* FOLLOW */
-    findFollow();
-
+void printResults()
+{
     printf("\nFIRST\n");
 
     for (int i = 0; i < 26; i++)
@@ -151,6 +151,13 @@ int main()
 
             printf("}\n");
         }
+}
 
+int main()
+{
+    readGrammar();
+    computeFirstAll();
+    findFollow();
+    printResults();
     return 0;
 }

@@ -43,19 +43,22 @@ int findDFAState(DFA dfa[], DFA s, int dfaCount)
     return -1;
 }
 
-void acceptNFA(int states, int inputs, int nfa[][inputs][states], int nfaCount[][inputs])
+void acceptNFA(int states, int inputs, int nfa[states][inputs][states], int nfaCount[states][inputs])
 {
     printf("\nEnter transitions:\n");
+
     for (int i = 0; i < states; i++)
+    {
         for (int j = 0; j < inputs; j++)
         {
             printf("Transitions from q%d on input %d: ", i, j);
             scanf("%d", &nfaCount[i][j]);
+
             for (int k = 0; k < nfaCount[i][j]; k++)
                 scanf("%d", &nfa[i][j][k]);
         }
+    }
 }
-
 int conversion(int states, int inputs, int nfa[][inputs][states], int nfaCount[][inputs], DFA dfa[], int dfaCount)
 {
     printf("\nDFA Transition Table:\n");
@@ -103,8 +106,7 @@ int main()
     printf("Enter the no: of input symbols: ");
     scanf("%d", &inputs);
 
-    int nfa[states][inputs][states];
-    int nfaCount[states][inputs];
+    int nfa[states][inputs][states], nfaCount[states][inputs];
     acceptNFA(states, inputs, nfa, nfaCount);
 
     DFA dfa[1 << states];
