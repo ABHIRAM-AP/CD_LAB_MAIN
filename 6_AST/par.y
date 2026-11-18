@@ -19,7 +19,7 @@
     Node *make_var(char var);
     Node *make_op(char op, Node *left, Node *right);
 
-    void preorder(Node *root);
+    void levelorder(Node *root);
 %}
 
 %union {
@@ -93,20 +93,35 @@ Node *make_op(char op, Node *left, Node *right)
     return n;
 }
 
-void preorder(Node *root)
+/* Level Order Traversal */
+
+void levelorder(Node *root)
 {
-    if (!root)
+    if (root == NULL)
         return;
 
-    if (root->op != 0)
-        printf("%c ", root->op);
-    else if (root->var != 0)
-        printf("%c ", root->var);
-    else
-        printf("%d ", root->val);
+    Node *queue[100];
+    int front = 0, rear = 0;
 
-    preorder(root->left);
-    preorder(root->right);
+    queue[rear++] = root;
+
+    while (front < rear)
+    {
+        Node *temp = queue[front++];
+
+        if (temp->op != 0)
+            printf("%c ", temp->op);
+        else if (temp->var != 0)
+            printf("%c ", temp->var);
+        else
+            printf("%d ", temp->val);
+
+        if (temp->left != NULL)
+            queue[rear++] = temp->left;
+
+        if (temp->right != NULL)
+            queue[rear++] = temp->right;
+    }
 }
 
 void yyerror(char *s)
@@ -118,9 +133,10 @@ int main()
 {
     printf("Enter expression: ");
 
-    if (yyparse() == 0) {
-        printf("Preorder\n");
-        preorder(root);
+    if (yyparse() == 0)
+    {
+        printf("Level Order Traversal:\n");
+        levelorder(root);
         printf("\n");
     }
 
