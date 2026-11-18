@@ -1,97 +1,128 @@
+
 %{
-#include <stdio.h>
-#include <stdlib.h>
+    #include <stdio.h>
+    #include <stdlib.h>
 
-typedef struct Node {
-    char op;            
-    int val;            
-    struct Node *left;  
-    struct Node *right; 
-} Node;
+    void yyerror(char *s);
+    int yylex();
 
+    typedef struct Node {
+        int val;
+        char var;
+        char op;
+        struct Node *left, *right;
+    } Node;
 
-Node* make_num(int val);
-Node* make_op(char op, Node *left, Node *right);
-void preorder(Node *root);
-int yylex(void);
-void yyerror(const char *s);
+    Node *root;
 
-Node *root;
+    Node *make_num(int val);
+    Node *make_var(char var);
+    Node *make_op(char op, Node *left, Node *right);
+
+    void preorder(Node *root);
 %}
 
-/* YACC Union for handling values during parsing */
 %union {
     int val;
+    char var;
     struct Node *node;
 }
 
 %token <val> NUMBER
+%token <var> ID
+
 %type <node> expr term factor
 
 %%
 
-program:
-    expr '\n' { root = $1; return 0; }
+input:
+    expr '\n' {
+        root = $1;
+        return 0;
+    }
     ;
 
 expr:
-    expr '+' term { $$ = make_op('+', $1, $3); }
-  | expr '-' term { $$ = make_op('-', $1, $3); }
-  | term          { $$ = $1; }
-  ;
+      expr '+' term { $$ = make_op('+', $1, $3); }
+    | expr '-' term { $$ = make_op('-', $1, $3); }
+    | term          { $$ = $1; }
+    ;
 
 term:
-    term '*' factor { $$ = make_op('*', $1, $3); }
-  | term '/' factor { $$ = make_op('/', $1, $3); }
-  | factor          { $$ = $1; }
-  ;
+      term '*' factor { $$ = make_op('*', $1, $3); }
+    | term '/' factor { $$ = make_op('/', $1, $3); }
+    | factor          { $$ = $1; }
+    ;
 
 factor:
-    '(' expr ')' { $$ = $2; }
-  | NUMBER       { $$ = make_num($1); }
-  ;
+      '(' expr ')' { $$ = $2; }
+    | NUMBER       { $$ = make_num($1); }
+    | ID           { $$ = make_var($1); }
+    ;
 
 %%
 
-Node* make_num(int val) {
+Node *make_num(int val)
+{
     Node *n = malloc(sizeof(Node));
-    n->op = 0;   
-    n->val = val;
     n->left = n->right = NULL;
+    n->val = val;
+    n->var = 0;
+    n->op = 0;
     return n;
 }
 
-
-Node* make_op(char op, Node *left, Node *right) {
+Node *make_var(char var)
+{
     Node *n = malloc(sizeof(Node));
-    n->op = op;  
+    n->left = n->right = NULL;
+    n->val = 0;
+    n->var = var;
+    n->op = 0;
+    return n;
+}
+
+Node *make_op(char op, Node *left, Node *right)
+{
+    Node *n = malloc(sizeof(Node));
     n->left = left;
     n->right = right;
+    n->val = 0;
+    n->var = 0;
+    n->op = op;
     return n;
 }
 
-void preorder(Node *root) {
-    if (!root) return;
+void preorder(Node *root)
+{
+    if (!root)
+        return;
 
-    if (root->op == 0)
-        printf("%d ", root->val);
-    else
+    if (root->op != 0)
         printf("%c ", root->op);
+    else if (root->var != 0)
+        printf("%c ", root->var);
+    else
+        printf("%d ", root->val);
 
     preorder(root->left);
     preorder(root->right);
 }
 
-void yyerror(const char *s) {
+void yyerror(char *s)
+{
     printf("Error: %s\n", s);
 }
 
-int main() {
+int main()
+{
     printf("Enter expression: ");
+
     if (yyparse() == 0) {
-        printf("Preorder: ");
+        printf("Preorder\n");
         preorder(root);
         printf("\n");
     }
+
     return 0;
 }
