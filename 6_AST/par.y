@@ -95,32 +95,39 @@ Node *make_op(char op, Node *left, Node *right)
 
 /* Level Order Traversal */
 
-void levelorder(Node *root)
+void levelOrder(Node *root)
 {
-    if (root == NULL)
+    if(root == NULL)
         return;
 
-    Node *queue[100];
-    int front = 0, rear = 0;
+    Node *q[100];
+    int f=0,r=0;
 
-    queue[rear++] = root;
+    q[r++]=root;
 
-    while (front < rear)
+    while(f<r)
     {
-        Node *temp = queue[front++];
+        int count = r-f;
 
-        if (temp->op != 0)
-            printf("%c ", temp->op);
-        else if (temp->var != 0)
-            printf("%c ", temp->var);
-        else
-            printf("%d ", temp->val);
+        for(int i=0;i<count;i++)
+        {
+            Node *temp=q[f++];
 
-        if (temp->left != NULL)
-            queue[rear++] = temp->left;
+            if(temp->op!=0)
+                printf("%c ",temp->op);
+            else if(temp->var!=0)
+                printf("%c ",temp->var);
+            else
+                printf("%d ",temp->val);
 
-        if (temp->right != NULL)
-            queue[rear++] = temp->right;
+            if(temp->left!=NULL)
+                q[r++]=temp->left;
+
+            if(temp->right!=NULL)
+                q[r++]=temp->right;
+        }
+
+        printf("\n");
     }
 }
 
