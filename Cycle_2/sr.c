@@ -1,17 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-#define MAXP 10
-#define MAXD 50
+#define MAX 50
 
-char lhs[MAXP], rhs[MAXP][10];
-int np, n;
-char in[20], st[MAXD], start;
+char lhs[MAX], rhs[MAX][MAX], in[MAX], start, sStack[MAX][MAX], sAct[MAX][MAX], st[MAX];
 
-char sStack[MAXD][MAXD], sAct[MAXD][30];
-int sIp[MAXD];
+int n, np, sIp[MAX];
 
-void record(int d, int top, int ip, const char *act)
+void record(int d, int top, int ip, char *act)
 {
     memcpy(sStack[d], st, top);
     sStack[d][top] = '\0';
@@ -19,9 +17,9 @@ void record(int d, int top, int ip, const char *act)
     strcpy(sAct[d], act);
 }
 
-int parse(int top, int ip, int d)
+int parse(int d, int top, int ip)
 {
-    if (d >= MAXD)
+    if (d >= MAX)
         return 0;
     if (ip == n && top == 1 && st[0] == start)
     {
@@ -36,24 +34,23 @@ int parse(int top, int ip, int d)
     {
         int len = strlen(rhs[p]);
         if (len == 0)
-            continue; /* skip epsilon productions */
+            continue;
         if (top >= len && strncmp(st + top - len, rhs[p], len) == 0)
         {
             char act[30];
             st[top - len] = lhs[p];
             snprintf(act, sizeof act, "REDUCE %c->%s", lhs[p], rhs[p]);
             record(d, top - len + 1, ip, act);
-            if (parse(top - len + 1, ip, d + 1))
+            if (parse(d + 1, top - len + 1, ip))
                 return 1;
             memcpy(st + top - len, rhs[p], len);
         }
     }
-
-    if (ip < n && top < MAXD)
+    if (ip < n && top < MAX)
     {
         st[top] = in[ip];
         record(d, top + 1, ip + 1, "SHIFT");
-        if (parse(top + 1, ip + 1, d + 1))
+        if (parse(d + 1, top + 1, ip + 1))
             return 1;
     }
     return 0;
@@ -61,24 +58,23 @@ int parse(int top, int ip, int d)
 
 int main()
 {
-    char line[20];
-    printf("Number of productions: ");
+    char line[MAX];
+    printf("Enter total productions:");
     scanf("%d", &np);
-    printf("Enter productions (e.g. E->E+E):\n");
+    printf("Enter productions:");
     for (int i = 0; i < np; i++)
     {
-        scanf("%19s", line);
+        scanf("%s", line);
         lhs[i] = line[0];
         strcpy(rhs[i], line + 3);
     }
     start = lhs[0];
-    printf("Input string: ");
-    scanf("%19s", in);
+    printf("Input string:");
+    scanf("%s", in);
     n = strlen(in);
-
     if (!parse(0, 0, 0))
-        printf("\nString REJECTED\n");
+        printf("STRING REJCTED");
     else
-        printf("\nString ACCEPTED\n");
+        printf("STRING ACCEPTED");
     return 0;
 }

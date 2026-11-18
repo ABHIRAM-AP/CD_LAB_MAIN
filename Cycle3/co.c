@@ -90,12 +90,6 @@ int main()
     printf("Enter number of statements: ");
     scanf("%d", &n);
 
-    if (n < 1 || n > MAX_STMT)
-    {
-        printf("Invalid number of statements.\n");
-        return 1;
-    }
-
     printf("Enter statements (a=5, b=a, c=a+b):\n");
 
     readStatements(s, n);

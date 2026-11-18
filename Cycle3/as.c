@@ -99,7 +99,7 @@ int main()
     scanf("%d", &n);
 
     printf("Enter all TAC statements in one line:\n");
-    scanf(" %[^\n]", input);
+    scanf(" %499[^\n]", input);
 
     initialize();
 
