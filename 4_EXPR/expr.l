@@ -7,12 +7,11 @@
 
 [0-9]+(\.[0-9]+)?       { yylval = atof(yytext); return NUMBER; }
 
-[ \t\r]+                { /* Ignore spaces, tabs, and carriage returns */ }
+[ \t\r]+                ;
 
-\n                      { return '\n'; } /* Return newline to YACC */
+\n                      { return '\n'; }
 
-.                       { return yytext[0]; } /* Handles +, -, *, /, (, ) and any other char */
-
+.                       { return yytext[0]; } 
 %%
 
 int yywrap()

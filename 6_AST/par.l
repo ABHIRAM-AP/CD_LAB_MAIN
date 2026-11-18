@@ -1,16 +1,14 @@
 %{
-#include "y.tab.h"
+    #include "y.tab.h"   
+    #include<stdlib.h>
+     
 %}
 
 %%
-
 [0-9]+      { yylval.val = atoi(yytext); return NUMBER; }
 [-+*/\n()]  { return yytext[0]; }
 [ \t]       ; /* Skip spaces and tabs */
 .           ;
-
 %%
 
-int yywrap() {
-    return 1;
-}
+int yywrap(){return 1;}

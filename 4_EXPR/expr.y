@@ -17,10 +17,10 @@ int yylex();
 %%
 
 input
-    : expr '\n'  /* Added '\n' to match the Enter key */
+    : expr '\n'  
       {
           printf("Valid arithmetic expression\n");
-          return 0; /* Stop parsing successfully */
+          return 0; 
       }
     ;
 
